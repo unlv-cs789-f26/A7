@@ -1,0 +1,29 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix soc:  <https://cs789.unlv.edu/soc6#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# SHACL shapes: the ontology says what CAN exist; shapes say what a valid record MUST look like.
+# soc6.check_ontology() converts a sample of your KG to RDF and validates it against these shapes.
+
+soc:AlertGroupShape a sh:NodeShape ;
+    sh:targetClass soc:AlertGroup ;
+    sh:property [ sh:path soc:onHost ; sh:minCount 1 ; sh:maxCount 1 ; sh:class soc:Host ] ;
+    sh:property [ sh:path soc:matchesRule ; sh:minCount 1 ; sh:maxCount 1 ; sh:class soc:Rule ] ;
+    sh:property [ sh:path soc:count ; sh:minCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ] ;
+    sh:property [ sh:path soc:maxLevel ; sh:minCount 1 ; sh:datatype xsd:integer ;
+                  sh:minInclusive 0 ; sh:maxInclusive 16 ] .
+
+soc:RuleShape a sh:NodeShape ;
+    sh:targetClass soc:Rule ;
+    sh:property [ sh:path soc:ruleLevel ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+    sh:property [ sh:path soc:description ; sh:minCount 1 ; sh:datatype xsd:string ] .
+
+# BEGIN SOLUTION 4
+soc:HostShape a sh:NodeShape ;
+    sh:targetClass soc:Host ;
+    sh:property [ sh:path soc:criticality ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+                  sh:minInclusive 1 ; sh:maxInclusive 5 ] ;
+    sh:property [ sh:path soc:zone ; sh:minCount 1 ; sh:maxCount 1 ;
+                  sh:in ( "Perimeter" "DMZ" "Intranet" "Internal" ) ] ;
+    sh:property [ sh:path soc:ownedBy ; sh:minCount 1 ; sh:class soc:Person ] .
+# END SOLUTION 4

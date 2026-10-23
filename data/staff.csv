@@ -1,0 +1,7 @@
+username,name,team,app_role,phone,on_call
+tbaker,Tess Baker,Network Operations,asset_owner,555-0141,Mon-Wed
+rkhan,Rafael Khan,Messaging & Web,asset_owner,555-0177,Thu-Fri
+mlee,Mina Lee,Collaboration Services,asset_owner,555-0102,Sat-Sun
+analyst1,Dana Ortiz,SOC,tier1,555-0123,Mon-Fri day
+hunter1,Sam Whitaker,SOC,tier2,555-0190,Mon-Fri night
+manager1,Lena Yamamoto,SOC,manager,555-0116,escalation

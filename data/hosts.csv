@@ -1,0 +1,11 @@
+host,ip,role,zone,owner,criticality
+inet-firewall,172.19.128.1,Perimeter firewall and network IDS sensor,Perimeter,tbaker,5
+mail,172.19.130.4,Public mail server (SMTP/IMAP),DMZ,rkhan,4
+webserver,172.19.130.68,Public web server and reverse proxy,DMZ,rkhan,4
+cloud-share,172.19.130.106,File-sharing service for partners,DMZ,mlee,3
+vpn,172.19.131.174,Remote-access VPN gateway,DMZ,tbaker,5
+intranet-server,10.143.2.4,Internal intranet web portal (CMS),Intranet,mlee,4
+internal-share,10.143.0.103,Internal file share,Intranet,mlee,3
+inet-dns,192.168.231.254,Internal DNS resolver,Internal,tbaker,4
+davey-mail,192.168.231.56,Branch office mail relay,Internal,rkhan,2
+morris-mail,192.168.231.164,Branch office mail relay,Internal,rkhan,2

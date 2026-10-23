@@ -1,0 +1,17 @@
+# Notebook packages for A6 (vLLM is installed separately by install_vllm.sh; n8n by soc6.install_n8n())
+llama-index-core>=0.14,<0.15
+llama-index-llms-openai-like>=0.5
+langchain>=1.0
+langchain-core>=1.0
+langchain-community>=0.4
+langchain-openai>=1.0
+SQLAlchemy>=2.0
+rdflib>=7.0
+pyshacl>=0.30
+pyvis==0.3.2
+plotly>=5.20
+fastapi>=0.110
+uvicorn>=0.29
+networkx
+pyyaml
+requests

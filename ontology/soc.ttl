@@ -1,0 +1,119 @@
+@prefix soc:  <https://cs789.unlv.edu/soc6#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# =====================================================================================
+#  CS 789 A6 -- SOC ontology (OWL 2, Turtle)
+#  Every class becomes a node label in the property graph   (Host       -> HOST)
+#  Every object property becomes a relationship type          (onHost     -> ON_HOST)
+#  Every datatype property becomes a node property            (criticality -> criticality)
+#  soc:sensitivity "restricted" marks what a tier-1 analyst must never see.
+#  soc6.schema_from_ontology() reads this file; the KG, the LLM extractor and the access
+#  control layer all take their vocabulary from here.
+# =====================================================================================
+
+<https://cs789.unlv.edu/soc6> a owl:Ontology ;
+    rdfs:label "CS 789 A6 SOC ontology" ;
+    owl:versionInfo "1.0" .
+
+soc:sensitivity a owl:AnnotationProperty ;
+    rdfs:comment "\"restricted\" = only the manager role may see values of this class or property." .
+
+# ----------------------------------------------------------------------- core classes
+soc:Host a owl:Class ;
+    rdfs:label "Host" ;
+    rdfs:comment "A monitored machine with a Wazuh agent (the sensor that raised the alert)." .
+soc:IPAddress a owl:Class ;
+    rdfs:label "IP address" ;
+    rdfs:comment "An IPv4 address seen as source or destination of an alert." .
+soc:Person a owl:Class ;
+    rdfs:label "Person" ;
+    rdfs:comment "A member of staff: asset owners and SOC analysts." .
+soc:Account a owl:Class ;
+    rdfs:label "Account" ;
+    rdfs:comment "A user name that appears in an alert (mail, PAM, sudo)." .
+soc:Rule a owl:Class ;
+    rdfs:label "Detection rule" ;
+    rdfs:comment "A Wazuh rule (id, level, description)." .
+soc:Technique a owl:Class ;
+    rdfs:label "ATT&CK technique" .
+soc:Tactic a owl:Class ;
+    rdfs:label "ATT&CK tactic" .
+
+# ----------------------------------------------------------------------- core properties
+soc:hasIP a owl:ObjectProperty ;
+    rdfs:domain soc:Host ; rdfs:range soc:IPAddress .
+soc:ownedBy a owl:ObjectProperty ;
+    rdfs:domain soc:Host ; rdfs:range soc:Person .
+soc:mapsTo a owl:ObjectProperty ;
+    rdfs:domain soc:Rule ; rdfs:range soc:Technique .
+soc:inTactic a owl:ObjectProperty ;
+    rdfs:domain soc:Technique ; rdfs:range soc:Tactic .
+
+# relations that analysts write in shift-handover notes (extracted by the LLM in Part B)
+soc:reviewed a owl:ObjectProperty ;
+    rdfs:domain soc:Person ; rdfs:range soc:Host .
+soc:escalated a owl:ObjectProperty ;
+    rdfs:domain soc:Person ; rdfs:range soc:Host .
+soc:blocked a owl:ObjectProperty ;
+    rdfs:domain soc:Person ; rdfs:range soc:IPAddress .
+soc:loggedInto a owl:ObjectProperty ;
+    rdfs:domain soc:Account ; rdfs:range soc:Host .
+
+soc:role a owl:DatatypeProperty ;        rdfs:domain soc:Host ;   rdfs:range xsd:string .
+soc:zone a owl:DatatypeProperty ;        rdfs:domain soc:Host ;   rdfs:range xsd:string .
+soc:criticality a owl:DatatypeProperty ; rdfs:domain soc:Host ;   rdfs:range xsd:integer .
+soc:country a owl:DatatypeProperty ;     rdfs:domain soc:IPAddress ; rdfs:range xsd:string .
+soc:internal a owl:DatatypeProperty ;    rdfs:domain soc:IPAddress ; rdfs:range xsd:boolean .
+soc:fullName a owl:DatatypeProperty ;    rdfs:domain soc:Person ; rdfs:range xsd:string .
+soc:team a owl:DatatypeProperty ;        rdfs:domain soc:Person ; rdfs:range xsd:string .
+soc:appRole a owl:DatatypeProperty ;     rdfs:domain soc:Person ; rdfs:range xsd:string .
+soc:ruleLevel a owl:DatatypeProperty ;   rdfs:domain soc:Rule ;   rdfs:range xsd:integer .
+soc:description a owl:DatatypeProperty ; rdfs:domain soc:Rule ;   rdfs:range xsd:string .
+soc:techName a owl:DatatypeProperty ;    rdfs:domain soc:Technique ; rdfs:range xsd:string .
+
+# BEGIN SOLUTION 1
+soc:AlertGroup a owl:Class ;
+    rdfs:label "Alert group" ;
+    rdfs:comment "All alerts of one rule on one host from one source IP within one clock hour." .
+soc:onHost a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:Host .
+soc:fromIP a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:IPAddress .
+soc:toIP a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:IPAddress .
+soc:matchesRule a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:Rule .
+soc:involvesAccount a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:Account .
+soc:hour a owl:DatatypeProperty ;      rdfs:domain soc:AlertGroup ; rdfs:range xsd:string .
+soc:firstSeen a owl:DatatypeProperty ; rdfs:domain soc:AlertGroup ; rdfs:range xsd:dateTime .
+soc:lastSeen a owl:DatatypeProperty ;  rdfs:domain soc:AlertGroup ; rdfs:range xsd:dateTime .
+soc:count a owl:DatatypeProperty ;     rdfs:domain soc:AlertGroup ; rdfs:range xsd:integer .
+soc:maxLevel a owl:DatatypeProperty ;  rdfs:domain soc:AlertGroup ; rdfs:range xsd:integer .
+# END SOLUTION 1
+
+# BEGIN SOLUTION 2
+soc:ExerciseWindow a owl:Class ;
+    rdfs:label "Exercise window" ;
+    rdfs:comment "A scheduled red-team exercise phase (start, end). Known only to the SOC manager." ;
+    soc:sensitivity "restricted" .
+soc:overlaps a owl:ObjectProperty ;
+    rdfs:domain soc:AlertGroup ; rdfs:range soc:ExerciseWindow ;
+    soc:sensitivity "restricted" .
+soc:phase a owl:DatatypeProperty ;       rdfs:domain soc:ExerciseWindow ; rdfs:range xsd:string ;
+    soc:sensitivity "restricted" .
+soc:windowStart a owl:DatatypeProperty ; rdfs:domain soc:ExerciseWindow ; rdfs:range xsd:dateTime ;
+    soc:sensitivity "restricted" .
+soc:windowEnd a owl:DatatypeProperty ;   rdfs:domain soc:ExerciseWindow ; rdfs:range xsd:dateTime ;
+    soc:sensitivity "restricted" .
+# END SOLUTION 2
+
+# BEGIN SOLUTION 3
+soc:phone a owl:DatatypeProperty ;  rdfs:domain soc:Person ; rdfs:range xsd:string ;
+    soc:sensitivity "restricted" .
+soc:onCall a owl:DatatypeProperty ; rdfs:domain soc:Person ; rdfs:range xsd:string ;
+    soc:sensitivity "restricted" .
+# END SOLUTION 3

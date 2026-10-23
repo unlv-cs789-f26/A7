@@ -1,0 +1,186 @@
+{
+ "id": "soc6triage000001",
+ "name": "SOC alert triage (CS 789 A7)",
+ "active": false,
+ "nodes": [
+  {
+   "id": "a1",
+   "name": "Alert in",
+   "type": "n8n-nodes-base.webhook",
+   "typeVersion": 2,
+   "position": [
+    0,
+    0
+   ],
+   "webhookId": "soc6-alert-in",
+   "parameters": {
+    "httpMethod": "POST",
+    "path": "soc-alert",
+    "responseMode": "onReceived",
+    "options": {}
+   }
+  },
+  {
+   "id": "a2",
+   "name": "Triage",
+   "type": "n8n-nodes-base.httpRequest",
+   "typeVersion": 4.2,
+   "position": [
+    240,
+    0
+   ],
+   "parameters": {
+    "method": "POST",
+    "url": "http://localhost:8080/api/triage",
+    "sendBody": true,
+    "specifyBody": "json",
+    "jsonBody": "={{ JSON.stringify($json.body) }}",
+    "options": {
+     "timeout": 120000
+    }
+   }
+  },
+  {
+   "id": "a3",
+   "name": "P1 or P2?",
+   "type": "n8n-nodes-base.if",
+   "typeVersion": 2.2,
+   "position": [
+    480,
+    0
+   ],
+   "parameters": {
+    "conditions": {
+     "options": {
+      "caseSensitive": true,
+      "leftValue": "",
+      "typeValidation": "strict",
+      "version": 2
+     },
+     "conditions": [
+      {
+       "id": "c1",
+       "leftValue": "={{ $json.priority }}",
+       "rightValue": "^P[12]$",
+       "operator": {
+        "type": "string",
+        "operation": "regex"
+       }
+      }
+     ],
+     "combinator": "and"
+    },
+    "options": {}
+   }
+  },
+  {
+   "id": "a4",
+   "name": "Write summary (replace with LLM)",
+   "type": "n8n-nodes-base.set",
+   "typeVersion": 3.4,
+   "position": [
+    740,
+    -140
+   ],
+   "parameters": {
+    "assignments": {
+     "assignments": [
+      {
+       "id": "s1",
+       "name": "text",
+       "value": "",
+       "type": "string"
+      }
+     ]
+    },
+    "options": {}
+   }
+  },
+  {
+   "id": "a5",
+   "name": "Open case",
+   "type": "n8n-nodes-base.httpRequest",
+   "typeVersion": 4.2,
+   "position": [
+    1060,
+    -140
+   ],
+   "parameters": {
+    "method": "POST",
+    "url": "http://localhost:8080/api/cases",
+    "sendBody": true,
+    "specifyBody": "json",
+    "jsonBody": "={{ JSON.stringify({ alert_id: $('Triage').item.json.alert_id, alert_ts: $('Alert in').item.json.body.ts, host: $('Triage').item.json.host, owner: $('Triage').item.json.owner, priority: $('Triage').item.json.priority, reason: $('Triage').item.json.reason, summary: $json.text, source: 'n8n' }) }}",
+    "options": {}
+   }
+  },
+  {
+   "id": "a6",
+   "name": "Log only",
+   "type": "n8n-nodes-base.noOp",
+   "typeVersion": 1,
+   "position": [
+    740,
+    260
+   ],
+   "parameters": {}
+  }
+ ],
+ "connections": {
+  "Alert in": {
+   "main": [
+    [
+     {
+      "node": "Triage",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Triage": {
+   "main": [
+    [
+     {
+      "node": "P1 or P2?",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "P1 or P2?": {
+   "main": [
+    [
+     {
+      "node": "Write summary (replace with LLM)",
+      "type": "main",
+      "index": 0
+     }
+    ],
+    [
+     {
+      "node": "Log only",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Write summary (replace with LLM)": {
+   "main": [
+    [
+     {
+      "node": "Open case",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  }
+ },
+ "settings": {
+  "executionOrder": "v1"
+ },
+ "pinData": {}
+}

@@ -1,0 +1,11 @@
+technique_id,name,tactics
+T1078,Valid Accounts,Defense Evasion|Persistence|Privilege Escalation|Initial Access
+T1595.002,Active Scanning: Vulnerability Scanning,Reconnaissance
+T1110,Brute Force,Credential Access
+T1110.001,Brute Force: Password Guessing,Credential Access
+T1021,Remote Services,Lateral Movement
+T1021.004,Remote Services: SSH,Lateral Movement
+T1055,Process Injection,Defense Evasion|Privilege Escalation
+T1083,File and Directory Discovery,Discovery
+T1190,Exploit Public-Facing Application,Initial Access
+T1548.003,Abuse Elevation Control Mechanism: Sudo and Sudo Caching,Privilege Escalation|Defense Evasion
